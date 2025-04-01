@@ -6,8 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-
-
 # Terraform
 **/.terraform/
 *.tfstate
@@ -185,4 +183,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+<<<<<<< HEAD
 .terraform/
+=======
+>>>>>>> 1d21606d3a4978d74f34e785c5b95ace365b3841
