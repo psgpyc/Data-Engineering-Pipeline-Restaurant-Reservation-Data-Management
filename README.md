@@ -69,8 +69,6 @@ As a data engineer, I’ve built a **production-grade architecture** that progra
 
 ## 👨‍💻 Author
 
-**Paritosh Ghimire**  
-_Data Engineer _  
-🌐 [LinkedIn](https://www.linkedin.com/in/psgpyc/) •
+**Paritosh Ghimire** [LinkedIn](https://www.linkedin.com/in/psgpyc/) •
 ---
 
