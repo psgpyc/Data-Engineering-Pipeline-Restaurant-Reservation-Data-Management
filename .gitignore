@@ -14,6 +14,9 @@ __pycache__/
 crash.log
 terraform.tfvars
 
+# zip
+
+*.zip
 
 .DS_Store
 

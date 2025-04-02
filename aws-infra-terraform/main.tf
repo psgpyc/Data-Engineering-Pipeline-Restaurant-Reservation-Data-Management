@@ -25,3 +25,12 @@ module "access_s3_iam_role_module" {
   bucket_access_policy = file("./policies/s3-bucket-access-policy.json")
 
 }
+
+
+module "provision_pipeline_lambda" {
+  source = "./modules/lambda"
+  i_am_role_name = "grant_lambda_access_to_cloudwatch_and_s3"
+  lambda_assume_role_policy = file("./policies/lambda-assume-role-policy.json")
+  lambda_bucket_access_policy = file("./policies/s3-bucket-access-policy.json")
+  lambda_cloudwatch_access_policy = file("./policies/cloudwatch-log-access-policy.json")
+}
