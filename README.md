@@ -11,7 +11,7 @@ As a data engineer, I’ve built a **production-grade architecture** that progra
 
 | Layer | Tools Used |
 |-------|------------|
-| **Infrastructure as Code(IaC)** | Terraform ( to provision S3, IAM setup) |
+| **Infrastructure as Code(IaC)** | Terraform ( to provision S3, EC2, AWS Lambda and IAM setup) |
 | **Cloud Provider** | AWS (Using Boto3) |
 | **Data Processing** | SQL, Pandas |
 | **Data Orchestration** | Apache Airflow |
