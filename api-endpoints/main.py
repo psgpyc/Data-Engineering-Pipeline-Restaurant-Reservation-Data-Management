@@ -37,6 +37,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+@app.get("/")
+def home():
+    data = {
+        "data": "Use the api url: /api/bookings/{restaurant_id}"
+    }
+    
+    return JSONResponse(content=data)
+
 @app.get("/api/bookings/{restaurant_id}")
 def get_booking(restaurant_id: str):
     data = restaurant_data.get(restaurant_id)
