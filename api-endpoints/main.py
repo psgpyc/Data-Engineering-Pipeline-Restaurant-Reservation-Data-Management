@@ -39,7 +39,6 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/api/bookings/{restaurant_id}")
 def get_booking(restaurant_id: str):
-    print(restaurant_data)
     data = restaurant_data.get(restaurant_id)
     if not data:
         raise HTTPException(status_code=404, detail="Restaurant not found")

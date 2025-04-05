@@ -34,3 +34,18 @@ module "provision_pipeline_lambda" {
   lambda_bucket_access_policy = file("./policies/s3-bucket-access-policy.json")
   lambda_cloudwatch_access_policy = file("./policies/cloudwatch-log-access-policy.json")
 }
+
+module "create_ec2" {
+
+    source = "./modules/ec2"
+
+    ami_id = "ami-01e479df1702f1d13"
+
+    instance_type_ = "t2.micro"
+    
+    key_name = "base-kp"
+
+
+
+}
+
