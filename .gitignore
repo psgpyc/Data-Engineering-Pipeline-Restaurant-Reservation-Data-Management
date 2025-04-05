@@ -18,6 +18,10 @@ terraform.tfvars
 
 *.zip
 
+**/data/**
+
+
+
 .DS_Store
 
 # Distribution / packaging

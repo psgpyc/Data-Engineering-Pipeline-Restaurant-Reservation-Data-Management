@@ -48,18 +48,24 @@ resource "aws_iam_policy_attachment" "attach-bucket-access-policy" {
 
 data "archive_file" "zip_airflow_dags" {
     type = "zip"
-    source_dir = "${path.module}/../../dags"
-    output_path = "${path.module}/../../dags/lambda_function_payload.zip"
+    source_dir = "${path.module}/code/lambda_build"
+    output_path = "${path.module}/payload/lambda_function_payload.zip"
 
 }
 
 
 resource "aws_lambda_function" "this" {
-    filename = "${path.module}/../../dags/lambda_function_payload.zip"
-    function_name = "pipeline_lambda_handler"
+    
+    filename = "${path.module}/payload/lambda_function_payload.zip"
+    function_name = "gfaker"
     role = aws_iam_role.this.arn
-    handler = "launch_lambda.lambda_handler"
+    handler = "populate.lambda_handler"
+
     runtime = "python3.12"
+
+    timeout = 60
+    memory_size = 1024 
+
     depends_on = [ aws_iam_policy_attachment.attach-cloudwatch-policy,  aws_iam_policy_attachment.attach-bucket-access-policy]
   
 }

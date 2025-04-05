@@ -13,6 +13,12 @@ resource "aws_instance" "this" {
     key_name = var.key_name
 
     user_data = file("./modules/ec2/deploy.sh")
+
+    lifecycle {
+    ignore_changes = [
+      associate_public_ip_address
+    ]
+  }
     
 
     tags = {
