@@ -1,7 +1,7 @@
 
 # Ozzy: Multi-Platform Restaurant Booking Pipeline
 
-This project showcases an end-to-end **automated data engineering pipeline** for a group of 10 restaurants using 4 different booking platforms.
+This project showcases an end-to-end **automated data engineering pipeline** for a group of restaurants using 3 different booking platforms.
 
 As a data engineer, I’ve built a **production-grade architecture** that programmatically fetches booking data daily, stores and processes it using AWS and Python, and loads it into Snowflake for analytics and dashboarding.
 
