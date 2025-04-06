@@ -64,7 +64,7 @@ def generate_bookings_file(restaurant_id, restaurant_name, platform, num_booking
 
     bookings = [generate_booking(restaurant_id, restaurant_name, platform) for _ in range(num_bookings)]
 
-    filename = f"{platform.lower()}_{restaurant_name.lower()}_{datetime.now().date()}.json"
+    filename = f"{restaurant_name.lower()}_{datetime.now().date()}.json"
     
     if save_local:
 
@@ -89,28 +89,29 @@ def lambda_handler(event, context):
         {'id': '103', 'name': 'resz'}
     ]
 
-    platforms = ['opentable', 'fork', 'quandoo']
+    platforms = ['opentable', 'fork']
 
 
-    for restaurant, platform in zip(restaurants, platforms):
-        booking_data, filename = generate_bookings_file(restaurant_id=restaurant['id'], restaurant_name=restaurant['name'], platform=platform, num_bookings=5000)
+    for platform in platforms:
+        for restaurant in restaurants:
+            booking_data, filename = generate_bookings_file(restaurant_id=restaurant['id'], restaurant_name=restaurant['name'], platform=platform, num_bookings=5000)
 
-        json_data = json.dumps(booking_data, indent=2)
-
-
-        s3c = boto3.client('s3')
-        bucket_name = 'booking-raw-bucket'
-        object_key = f"{datetime.now().date()}/{platform}/{filename}"
+            json_data = json.dumps(booking_data, indent=2)
 
 
-        try:
-            s3c.put_object(Bucket=bucket_name, Key=object_key , Body=json_data, ContentType="application/json")
-            print(f'Successfully generated and loaded data for {datetime.date()} {platform}')
+            s3c = boto3.client('s3')
+            bucket_name = 'booking-raw-bucket'
+            object_key = f"{datetime.now().date()}/{platform}/{filename}"
 
 
-        except Exception as e:
-            logging.error(e)
-            
+            try:
+                s3c.put_object(Bucket=bucket_name, Key=object_key , Body=json_data, ContentType="application/json")
+                print(f'Successfully generated and loaded data for {restaurant['name']} // {platform}')
+
+
+            except Exception as e:
+                logging.error(e)
+                
     return {
         "statusCode": 200,
         "body": json.dumps("Bookings generated and uploaded to S3")

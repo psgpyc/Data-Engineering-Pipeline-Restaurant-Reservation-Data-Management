@@ -57,6 +57,8 @@ data "archive_file" "zip_airflow_dags" {
 resource "aws_lambda_function" "this" {
     
     filename = "${path.module}/payload/lambda_function_payload.zip"
+    source_code_hash = data.archive_file.zip_airflow_dags.output_base64sha256
+
     function_name = "gfaker"
     role = aws_iam_role.this.arn
     handler = "populate.lambda_handler"
