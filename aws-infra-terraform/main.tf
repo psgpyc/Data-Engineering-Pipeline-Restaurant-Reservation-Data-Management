@@ -33,6 +33,9 @@ module "provision_pipeline_lambda" {
   lambda_assume_role_policy = file("./policies/lambda-assume-role-policy.json")
   lambda_bucket_access_policy = file("./policies/s3-bucket-access-policy.json")
   lambda_cloudwatch_access_policy = file("./policies/cloudwatch-log-access-policy.json")
+
+
+  eventbridge_schedule_arn = module.eventbridge_booking_create_trigger.scheduler_role_arn
 }
 
 module "create_ec2" {
@@ -45,7 +48,38 @@ module "create_ec2" {
     
     key_name = "base-kp"
 
-
-
 }
 
+
+
+module "eventbridge_booking_create_trigger" {
+  source = "./modules/eventbridge"
+
+  schedule_name       = "daily-booking-schedule"
+  description         = "Trigger Lambda daily at 5AM UTC"
+  schedule_expression = "cron(0 5 * * ? *)"
+
+  lambda_arn          = module.provision_pipeline_lambda.lambda_function_arn
+
+  scheduler_role_arn = module.eventbridge_booking_create_trigger.scheduler_role_arn
+
+  payload = {
+    message = "Booking trigger from EventBridge"
+  }
+
+ 
+}
+
+
+resource "aws_lambda_permission" "allow_eventbridge_scheduler" {
+  statement_id  = "AllowEventBridgeScheduler"
+  action        = "lambda:InvokeFunction"
+  function_name = module.provision_pipeline_lambda.lambda_function_name
+  principal     = "scheduler.amazonaws.com"
+  source_arn    = module.eventbridge_booking_create_trigger.eventbridge_schedule_arn
+
+   depends_on = [
+    module.provision_pipeline_lambda,
+    module.eventbridge_booking_create_trigger
+  ]
+}

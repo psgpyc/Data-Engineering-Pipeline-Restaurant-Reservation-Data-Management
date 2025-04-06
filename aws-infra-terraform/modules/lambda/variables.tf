@@ -17,3 +17,8 @@ variable "lambda_bucket_access_policy" {
     type = string
   
 }
+
+variable "eventbridge_schedule_arn" {
+  description = "ARN of the EventBridge schedule that triggers this Lambda"
+  type        = string
+}
