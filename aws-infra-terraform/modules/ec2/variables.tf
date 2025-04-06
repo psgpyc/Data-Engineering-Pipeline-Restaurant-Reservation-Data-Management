@@ -21,3 +21,8 @@ variable "key_name" {
     type = string
   
 }
+
+
+variable "attach_role_to_instance_profile" {
+    type = string
+}

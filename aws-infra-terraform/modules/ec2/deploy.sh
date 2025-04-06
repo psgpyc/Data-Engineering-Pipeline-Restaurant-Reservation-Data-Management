@@ -12,7 +12,7 @@ python3 -m venv prodenv
 source prodenv/bin/activate
 
 pip install --upgrade pip
-pip install fastapi uvicorn
+pip install fastapi uvicorn boto3
 
 
 sudo systemctl enable nginx

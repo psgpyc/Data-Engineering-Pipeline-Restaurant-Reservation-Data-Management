@@ -14,13 +14,13 @@ resource "aws_instance" "this" {
 
     user_data = file("./modules/ec2/deploy.sh")
 
+    iam_instance_profile = aws_iam_instance_profile.pipeline-ec2_instance_profile.name
+
     lifecycle {
     ignore_changes = [
       associate_public_ip_address
     ]
   }
-    
-
     tags = {
 
       Name = "pipeline-ec2"
@@ -28,6 +28,12 @@ resource "aws_instance" "this" {
     }
 
 }
+
+resource "aws_iam_instance_profile" "pipeline-ec2_instance_profile" {
+  name = "pipeline-ec2-instance-profile"
+  role = var.attach_role_to_instance_profile
+}
+
 
 resource "aws_vpc" "this" {
     cidr_block = "10.0.0.0/16"
