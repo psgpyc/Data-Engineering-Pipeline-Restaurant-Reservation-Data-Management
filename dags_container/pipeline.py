@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 
 from validators import ReservationValidator
-from logger_config import set_logger
 
 os.environ['NO_PROXY'] = '*'
 
@@ -27,38 +26,62 @@ logger = logging.getLogger(f'custom_pipeline_logger')
 def etl_process_reservation_data_daily():
     @task(task_id="extract-res-data", retries=3, retry_delay=timedelta(minutes=2), depends_on_past=False)
     def extract(**kwargs):
-        logger.info('Fetching data...')
-        res = requests.get("http://3.8.215.255/opentable/api/bookings/resx/prev")
-        if res.status_code == 200:
-            res_data = res.json()
-            print(res_data)
-            logger.info('data fetched successfully...')
+        platforms = ['opentable','fork']
+        restaurants = ['resx', 'resy', 'resz']
 
-            return {'data': res_data}
-        else:
-            return {'error': f'An error occured. Status Code:{res.status_code}'}
+        agg_data = {}
+
+        logger.info('Data Fetching Started....')
+        for platform in platforms:
+            agg_data[platform] = {}
+            for restaurant in restaurants:
+                response = requests.get(f"http://3.8.215.255/{platform}/api/bookings/{restaurant}/prev")
+                if response.status_code == 200:
+                    agg_data[platform][restaurant] = response.json()
+                    logger.info(f'data fetched successfully for {platform}-{restaurant}')
+                else:
+                    logger.error(f'An error occured. Status Code:{response.status_code}')
+        return agg_data
 
     @task(task_id="transform-res-data", retries=3, retry_delay=timedelta(minutes=2), depends_on_past=True)
     def transform(data):
-        logger.info('data into transform pipe..')
+        logger.info('\n data entered transform pipe..')
         validated_reservation = []
         validation_error_reservation = []
         res = data
         logger.info("Data passed on to validators....")
-        for each in res['data']:
-            try:
-                reservations = ReservationValidator(**each)
-                validated_reservation.append(reservations)
-            except ValidationError as e:
-                validation_error.append(each)
-                logging.error(f'An error occured: {e}')
+        for platform in res:
+            for restaurant in data[platform]:
+                for reservation in data[platform][restaurant]:
+                    try:
+                        reservations = ReservationValidator(**reservation)
+                        validated_reservation.append(reservations.model_dump(mode='json'))
+                    except ValidationError as e:
+                        validation_error_reservation.append(reservation)
+                        logging.error(f'An error occured: {e}')
 
-        logger.info('Successfully validated data....')
-        logger.info(f'Validated: {len(validated_reservation)}/{len(res["data"])}')
-        logger.info(f'Error in validation:{len(validation_error_reservation)}')
+        print(validated_reservation)
+        logger.info(f'Validated: {len(validated_reservation)}')
+        logger.info(f'Validated: {len(validation_error_reservation)}')
 
+        if len(validation_error_reservation)  != 0:
+            logger.error(f'Error in validation:{len(validation_error_reservation)}')
 
-    data_or_error = extract()
-    transform(data=data_or_error)
+        return {
+            'validated': validated_reservation,
+            'error': validation_error_reservation
+        }
+    
+    @task(task_id="load_data", retries=3, retry_delay=timedelta(minutes=2))
+    def load(validated_data):
+        data = validated_data
+        print(data['validated'])
+
+        
+        return {'success': 'Successfully Done!!!'}
+
+    agg_data = extract()
+    response_data  = transform(data=agg_data)
+    load(response_data)
 
 etl_process_reservation_data_daily()
