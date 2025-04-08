@@ -7,7 +7,7 @@ load_dotenv()
 
 logger = logging.getLogger('custom_pipeline_logger')
 
-def establish_connect(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOOKSCHEMA"):
+def get_connector(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOOKSCHEMA"):
     conn = None
     conn_param = {
             "account": os.environ.get('snowflake_account'),
@@ -28,4 +28,4 @@ def establish_connect(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOO
 
     return conn
 
-establish_connect()
+
