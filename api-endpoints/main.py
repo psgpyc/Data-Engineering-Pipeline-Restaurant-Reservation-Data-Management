@@ -57,6 +57,7 @@ def get_booking(platform: str, restaurant_id: str, date_today:str):
             response = s3c.get_object(Bucket='booking-raw-bucket', Key=to_get_object_key)
             
             content = response['Body'].read().decode('utf-8')
+            
             data = json.loads(content)
             
             if not data:
