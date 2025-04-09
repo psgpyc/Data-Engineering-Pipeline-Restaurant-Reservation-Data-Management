@@ -8,8 +8,9 @@ load_dotenv()
 
 logger = logging.getLogger('custom_pipeline_logger')
 
+
 def get_connector(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOOKSCHEMA"):
-    conn = None
+    
     conn_param = {
             "account": os.environ.get('snowflake_account'),
             "user": os.environ.get('snowflake_user'),
@@ -23,11 +24,10 @@ def get_connector(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOOKSCH
     
     try:
         conn = connector.connect(**conn_param)
-        logger.info('connection established...')
     except Exception as e:
         logger.error(f'An error occured while connecting to snowflake: {e}')
 
-
+    
     return conn
 
 

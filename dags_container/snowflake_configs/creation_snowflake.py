@@ -67,3 +67,66 @@ def create_file_format():
         logger.info(f"An error occured while creating a fileformat: {e}")
     
   
+def create_base_tables():
+    use_existing()
+
+    create_table_restaurant = """
+        CREATE TABLE IF NOT EXISTS restaurants (
+            restaurant_id INT NOT NULL,
+            restaurant_name VARCHAR(50),
+            PRIMARY KEY(restaurant_id));
+    """
+
+    create_table_platform = """
+        CREATE TABLE IF NOT EXISTS platforms (
+            platform_id INT IDENTITY START 1 INCREMENT 1,
+            platform_name VARCHAR(50),
+            PRIMARY KEY(platform_id));
+    """
+
+    create_customer_table = """
+        CREATE TABLE IF NOT EXISTS customers (
+            customer_id INT PRIMARY KEY IDENTITY START 1 INCREMENT 1,
+            customer_name VARCHAR(100) NOT NULL,
+            customer_phone VARCHAR(50) NOT NULL,
+            customer_email VARCHAR(50) NOT NULL);
+    """
+
+
+    create_experience_table = """
+        CREATE TABLE IF NOT EXISTS experiences (
+            experience_id INT PRIMARY KEY IDENTITY START 1 INCREMENT 1,
+            experience_name VARCHAR(50),
+            price DECIMAL(10, 2))
+    """
+
+    create_table_payments = """
+        CREATE TABLE IF NOT EXISTS payments (
+            payment_id INT PRIMARY KEY IDENTITY START 1 INCREMENT 1,
+            payment_method VARCHAR(10) NOT NULL,
+            card_last_four INT,
+            amount_paid DECIMAL(10, 2) NOT NULL,
+            tip_amount DECIMAL(10, 2),
+            service_fee DECIMAL(10,2),
+            total_amount DECIMAL(10, 2)
+        )
+    """
+
+    create_table_reservation = """
+        CREATE TABLE IF NOT EXISTS reservation (
+            reservation_id VARCHAR(100) PRIMARY KEY,  
+            restaurant_id INT REFERENCES restaurants(restaurant_id),
+            platform INT REFERENCES platforms(platform_id),
+            status VARCHAR(10) NOT NULL,
+            reservation_date DATETIME NOT NULL,
+            party_size INT NOT NULL,
+            customer_id INT REFERENCES customers(customer_id),
+            special_request TEXT, 
+            created_at DATETIME, 
+            updated_at DATETIME, 
+            experience INT REFERENCES experiences(experience_id),
+            payment INT REFERENCES payments(payment_id)
+        
+        )
+       
+    """
