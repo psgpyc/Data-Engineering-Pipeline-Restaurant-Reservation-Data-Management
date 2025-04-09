@@ -3,6 +3,7 @@ import logging
 from snowflake import connector
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 logger = logging.getLogger('custom_pipeline_logger')
@@ -25,6 +26,7 @@ def get_connector(SNOWFLAKE_DATABASE = "KITABALAYA", SNOWFLAKE_SCHEMA = "BOOKSCH
         logger.info('connection established...')
     except Exception as e:
         logger.error(f'An error occured while connecting to snowflake: {e}')
+
 
     return conn
 

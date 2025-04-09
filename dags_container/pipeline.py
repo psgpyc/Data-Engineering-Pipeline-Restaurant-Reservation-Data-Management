@@ -1,4 +1,7 @@
 import os
+import boto3
+from botocore.exceptions import ClientError
+import json
 import logging
 import requests
 from pydantic import ValidationError
@@ -6,6 +9,7 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 
 from validators import ReservationValidator
+from snowflake_configs.creation_snowflake import create_file_format
 
 os.environ['NO_PROXY'] = '*'
 
@@ -24,7 +28,8 @@ logger = logging.getLogger(f'custom_pipeline_logger')
      tags=['etl', 'reservation'],
      catchup=False)
 def etl_process_reservation_data_daily():
-    @task(task_id="extract-res-data", retries=3, retry_delay=timedelta(minutes=2), depends_on_past=False)
+
+    @task(task_id="extract-res-data", retries=3, retry_delay=timedelta(minutes=2))
     def extract(**kwargs):
         platforms = ['opentable','fork']
         restaurants = ['resx', 'resy', 'resz']
@@ -43,8 +48,8 @@ def etl_process_reservation_data_daily():
                     logger.error(f'An error occured. Status Code:{response.status_code}')
         return agg_data
 
-    @task(task_id="transform-res-data", retries=3, retry_delay=timedelta(minutes=2), depends_on_past=True)
-    def transform(data):
+    @task(task_id="validate-res-data", retries=3, retry_delay=timedelta(minutes=2))
+    def validate(data):
         logger.info('\n data entered transform pipe..')
         validated_reservation = []
         validation_error_reservation = []
@@ -75,13 +80,27 @@ def etl_process_reservation_data_daily():
     @task(task_id="load_data", retries=3, retry_delay=timedelta(minutes=2))
     def load(validated_data):
         data = validated_data
-        print(data['validated'])
+        data_json = json.dumps(data['validated'], indent=2)
+        s3c = boto3.client('s3')
+        bucket_name = "booking-staging-bucket"
+        object_key = f"{datetime.now().date()}/processed.json"
+        try:
+            s3c.put_object(Bucket=bucket_name, Key=object_key, Body=data_json, ContentType="application/json")
+            logger.info("Successfully loaded into the staging bucket.")
 
+        except ClientError as e:
+            logger.error(f"An error has occured while loading processed file into {bucket_name}: {e}")
         
         return {'success': 'Successfully Done!!!'}
+    
+    @task(task_id="transform_data", retries=3, retry_delay=timedelta(minutes=2))
+    def transform():
+        logging.info("File format creation initiated...")
+    
 
     agg_data = extract()
-    response_data  = transform(data=agg_data)
+    response_data  = validate(data=agg_data)
     load(response_data)
+    transform()
 
 etl_process_reservation_data_daily()
