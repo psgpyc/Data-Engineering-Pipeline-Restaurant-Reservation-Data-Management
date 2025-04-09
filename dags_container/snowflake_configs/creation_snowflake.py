@@ -25,6 +25,7 @@ def create_database_and_schema():
 
 
 def create_external_stage():
+    use_existing()
     try:
         curr.execute("""
             CREATE OR REPLACE STAGE ozzy.base.s3_stage_test
@@ -46,7 +47,7 @@ def create_file_format():
     use_existing()
 
     file_format_script = f"""
-        CREATE FILE FORMAT  IF NOT EXISTS {FILE_FORMAT_NAME}
+        CREATE FILE FORMAT IF NOT EXISTS {FILE_FORMAT_NAME}
         TYPE = 'JSON'
 
         COMPRESSION = 'NONE'
@@ -130,3 +131,40 @@ def create_base_tables():
         )
        
     """
+    try:
+        curr.execute(create_table_restaurant)
+        curr.execute(create_table_platform)
+        curr.execute(create_customer_table)
+        curr.execute(create_experience_table)
+        curr.execute(create_table_payments)
+        curr.execute(create_table_reservation)
+    except Exception as e:
+        logger.error(f"An error occured while creating the tables: {e}")
+
+def insert_into_restaurant_platform_table():
+    """
+        One time load script
+    """
+    use_existing()
+    try:
+        insert_into_restaurant = """
+            INSERT INTO restaurants(restaurant_id, restaurant_name) 
+            SELECT DISTINCT $1:restaurant_id::INT, $1:restaurant_name
+            FROM @S3_STAGE_TEST/2025-04-09
+            (FILE_FORMAT => 'READ_RESERVATION_JSON')
+
+        """
+
+        insert_into_platform = """
+
+            INSERT INTO platforms(platform_name)
+            SELECT DISTINCT $1:platform
+            FROM @s3_stage_test/2025-04-09
+            (FILE_FORMAT => 'READ_RESERVATION_JSON')
+
+        """
+
+        curr.execute(insert_into_restaurant)
+        curr.execute(insert_into_platform)
+    except Exception as e:
+        logger.error(f"An error occured while inserting data into restaurant/platform table...: {e}")

@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 
 from validators import ReservationValidator
-from snowflake_configs.creation_snowflake import create_file_format
+from snowflake_configs.creation_snowflake import insert_into_restaurant_platform_table
 
 os.environ['NO_PROXY'] = '*'
 
@@ -93,14 +93,16 @@ def etl_process_reservation_data_daily():
         
         return {'success': 'Successfully Done!!!'}
     
+
     @task(task_id="transform_data", retries=3, retry_delay=timedelta(minutes=2))
     def transform():
-        logging.info("File format creation initiated...")
-    
+        logging.info("Inserting into restaurant platform table......")
+        insert_into_restaurant_platform_table()
 
-    agg_data = extract()
-    response_data  = validate(data=agg_data)
-    load(response_data)
+
+    # agg_data = extract()
+    # response_data  = validate(data=agg_data)
+    # load(response_data)
     transform()
 
 etl_process_reservation_data_daily()
