@@ -10,6 +10,7 @@ from airflow.decorators import dag, task
 
 from validators import ReservationValidator
 from snowflake_configs.creation_snowflake import insert_into_restaurant_platform_table
+from insert_script import run_insert_statements
 
 os.environ['NO_PROXY'] = '*'
 
@@ -29,8 +30,14 @@ logger = logging.getLogger(f'custom_pipeline_logger')
      catchup=False)
 def etl_process_reservation_data_daily():
 
+    
+
     @task(task_id="extract-res-data", retries=3, retry_delay=timedelta(minutes=2))
     def extract(**kwargs):
+        
+        logger.info("                                         ")
+        logger.info("Pipeline Initiated....")
+
         platforms = ['opentable','fork']
         restaurants = ['resx', 'resy', 'resz']
 
@@ -46,6 +53,7 @@ def etl_process_reservation_data_daily():
                     logger.info(f'data fetched successfully for {platform}-{restaurant}')
                 else:
                     logger.error(f'An error occured. Status Code:{response.status_code}')
+        logger.info("Data Fetching ended....")
         return agg_data
 
     @task(task_id="validate-res-data", retries=3, retry_delay=timedelta(minutes=2))
@@ -91,18 +99,27 @@ def etl_process_reservation_data_daily():
         except ClientError as e:
             logger.error(f"An error has occured while loading processed file into {bucket_name}: {e}")
         
-        return {'success': 'Successfully Done!!!'}
+        return {'success': True}
     
 
     @task(task_id="transform_data", retries=3, retry_delay=timedelta(minutes=2))
-    def transform():
-        logging.info("Inserting into restaurant platform table......")
-        insert_into_restaurant_platform_table()
+    def transform(load_success):
+        if load_success['success']:
+            logger.info("Insertion started....")
+            success = run_insert_statements()
+            if success:
+                logger.info("Insertion Completed....")
+                logger.info("Pipeline Ended..")
+
+                
+        
+        
 
 
-    # agg_data = extract()
-    # response_data  = validate(data=agg_data)
-    # load(response_data)
-    transform()
+    agg_data = extract()
+    response_data  = validate(data=agg_data)
+    load_success = load(response_data)
+    transform(load_success)
+
 
 etl_process_reservation_data_daily()
