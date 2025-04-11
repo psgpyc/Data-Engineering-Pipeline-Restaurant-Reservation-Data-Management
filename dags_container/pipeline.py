@@ -10,7 +10,7 @@ from airflow.decorators import dag, task
 
 from validators import ReservationValidator
 from snowflake_configs.creation_snowflake import insert_into_restaurant_platform_table
-from insert_script import run_insert_statements
+from sql_script import run_insert_statements, run_create_view_statements, run_update_reservation_table_statements
 
 os.environ['NO_PROXY'] = '*'
 
@@ -106,15 +106,19 @@ def etl_process_reservation_data_daily():
     def transform(load_success):
         if load_success['success']:
             logger.info("Insertion started....")
-            success = run_insert_statements()
-            if success:
+            success_insert = run_insert_statements()
+            success_create_view = run_create_view_statements()
+            success_update_reservation_table = run_update_reservation_table_statements()
+            if success_insert:
                 logger.info("Insertion Completed....")
-                logger.info("Pipeline Ended..")
 
+            if success_create_view:
+                logger.info("Create view Completed...")   
                 
-        
-        
-
+            if success_update_reservation_table:
+                logger.info("Update reservation statement Completed")   
+                
+            logger.info("Pipeline Ended..")
 
     agg_data = extract()
     response_data  = validate(data=agg_data)
