@@ -25,4 +25,3 @@ def get_storage_integration():
         print(f"An error occured {e}")
 
 
-print(get_storage_integration())

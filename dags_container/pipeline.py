@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from airflow.decorators import dag, task
 
 from validators import ReservationValidator
-from snowflake_configs.creation_snowflake import insert_into_restaurant_platform_table
+from dags_container.snowflake_configs.creation import insert_into_restaurant_platform_table
 from sql_script import run_insert_statements, run_create_view_statements, run_update_reservation_table_statements
 
 os.environ['NO_PROXY'] = '*'
@@ -31,7 +31,6 @@ logger = logging.getLogger(f'custom_pipeline_logger')
 def etl_process_reservation_data_daily():
 
     
-
     @task(task_id="extract-res-data", retries=3, retry_delay=timedelta(minutes=2))
     def extract(**kwargs):
         

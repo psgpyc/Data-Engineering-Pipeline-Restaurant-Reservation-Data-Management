@@ -3,7 +3,6 @@ import logging
 from snowflake import connector
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
 logger = logging.getLogger('custom_pipeline_logger')
