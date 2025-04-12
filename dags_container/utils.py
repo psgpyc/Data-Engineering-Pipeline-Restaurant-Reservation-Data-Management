@@ -3,7 +3,6 @@ from snowflake_configs.establish_connection import get_connector
 conn = get_connector()
 
 
-
 def database_exists(database_name: str):
     """
         Checks if a database exists in the Snowflake account.
@@ -68,6 +67,34 @@ def stage_exists(database_name, stage_name):
         return len(result) == 1
 
 
+def check_privilege_in_storage_integration(integration_name='ozzy_pipeline_s3_access', role='SYSADMIN'):
+    with conn.cursor() as curr:
+        curr.execute(f"""
+            SHOW GRANTS ON  INTEGRATION {integration_name};
+        """)
+        curr.execute(f"""
+            SELECT 
+                "grantee_name"
+            FROM TABLE(RESULT_SCAN(LAST_QUERY_ID()));
+        """)
+        current_roles_with_access_previliege = [roles[0] for roles in curr.fetchall()]
+        if role not in current_roles_with_access_previliege:
+            return False
+        return True
+            
+
+def grant_usuage_access_to_storage_integration(integration_name='ozzy_pipeline_s3_access', role="SYSADMIN"):
+    with conn.cursor() as curr:
+        curr.execute("USE ROLE accountadmin;")
+        curr.execute(f"""
+            GRANT USAGE ON INTEGRATION {integration_name} TO ROLE {role};
+        """)
+        curr.execute(f"USE ROLE {role}")
+        if len(curr.fetchall())  > 0:
+            return True
+        return False
+        
+
 def storage_integration_exists(integration_name):
     """
         Checks if a storage integration exists.
@@ -129,7 +156,7 @@ def tables_exists(database_name: str, schema_name: str):
         result = curr.fetchall()
         if len(result) != 0:
             return [each[0] for each in result]
-        return False
+        return None
     
 
 

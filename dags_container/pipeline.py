@@ -7,10 +7,9 @@ import requests
 from pydantic import ValidationError
 from datetime import datetime, timedelta
 from airflow.decorators import dag, task
-
 from validators import ReservationValidator
-from dags_container.snowflake_configs.creation import insert_into_restaurant_platform_table
 from sql_script import run_insert_statements, run_create_view_statements, run_update_reservation_table_statements
+from pre_load_checks import run_pre_load_checks
 
 os.environ['NO_PROXY'] = '*'
 
@@ -85,7 +84,7 @@ def etl_process_reservation_data_daily():
         }
     
     @task(task_id="load_data", retries=3, retry_delay=timedelta(minutes=2))
-    def load(validated_data):
+    def process(validated_data):
         data = validated_data
         data_json = json.dumps(data['validated'], indent=2)
         s3c = boto3.client('s3')
@@ -100,29 +99,47 @@ def etl_process_reservation_data_daily():
         
         return {'success': True}
     
+    @task(task_id="pre_load_checks")
+    def pre_load_checks(process_success):
 
+        DATABASE_NAME = "RRANALYTICS"
+        SCHEMA_NAME = "RESERVATIONS"
+        EXTERNAL_STAGE = "RESERVATION_LAKE"
+        STORAGE_INTEGRATION = "ozzy_pipeline_s3_access"
+        FILE_FORMAT_NAME = "READ_RESERVATION_JSON"
+        TABLES = ["RESTAURANTS", "PLATFORMS", "CUSTOMERS", "PAYMENTS", "RESERVATIONS"]
+
+        run_pre_load_checks(logger, DATABASE_NAME, SCHEMA_NAME, EXTERNAL_STAGE, STORAGE_INTEGRATION, FILE_FORMAT_NAME, TABLES)
+
+        return {'success': True}
+    
     @task(task_id="transform_data", retries=3, retry_delay=timedelta(minutes=2))
-    def transform(load_success):
-        if load_success['success']:
-            logger.info("Insertion started....")
-            success_insert = run_insert_statements()
-            success_create_view = run_create_view_statements()
-            success_update_reservation_table = run_update_reservation_table_statements()
-            if success_insert:
-                logger.info("Insertion Completed....")
+    def load(load_success):
 
-            if success_create_view:
-                logger.info("Create view Completed...")   
-                
-            if success_update_reservation_table:
-                logger.info("Update reservation statement Completed")   
-                
-            logger.info("Pipeline Ended..")
+        DATABASE_NAME = "RRANALYTICS"
+        SCHEMA_NAME = "RESERVATIONS"
+        EXTERNAL_STAGE = "RESERVATION_LAKE"
+        
+        logger.info("Insertion started....")
+        success_insert = run_insert_statements(database_name=DATABASE_NAME, schema_name=SCHEMA_NAME, stage_name=EXTERNAL_STAGE)
+        success_create_view = run_create_view_statements(database_name=DATABASE_NAME, schema_name=SCHEMA_NAME, stage_name=EXTERNAL_STAGE)
+        success_update_reservation_table = run_update_reservation_table_statements(database_name=DATABASE_NAME, schema_name=SCHEMA_NAME)
+        if success_insert:
+            logger.info("Insertion Completed....")
+
+        if success_create_view:
+            logger.info("Create view Completed...")   
+            
+        if success_update_reservation_table:
+            logger.info("Update reservation statement Completed")   
+            
+        logger.info("Pipeline Ended..")
 
     agg_data = extract()
     response_data  = validate(data=agg_data)
-    load_success = load(response_data)
-    transform(load_success)
+    load_success = process(response_data)
+    pre_load_check_success = pre_load_checks(load_success)
+    load(pre_load_check_success)
 
 
 etl_process_reservation_data_daily()

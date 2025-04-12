@@ -22,6 +22,8 @@ def create_schema(database_name, database_schema, role="sysadmin"):
             curr.execute(f"CREATE SCHEMA IF NOT EXISTS {database_name}.{database_schema}")
     except Exception as e:
         logger.error(f"Error occured when creating schema: {e}")
+        raise RuntimeError(f"Failed to create schema {database_name}: {e}")
+
 
                   
 
@@ -32,32 +34,29 @@ def create_database(database_name, role="sysadmin"):
             curr.execute(f"CREATE DATABASE IF NOT EXISTS {database_name}")
     except Exception as e:
         logger.error(f"Error occured when creating database and schema: {e}")
+        raise RuntimeError(f"Failed to create database {database_name}: {e}")
    
 
 
-def create_external_stage(stage_name, database_name, schema_name, storage_integration_name, bucket_url):
-
-    if not bucket_url:
-        bucket_url = 's3://booking-staging-bucket/'
-
+def create_external_stage(stage_name, database_name, schema_name, storage_integration_name, bucket_url='s3://booking-staging-bucket/'):
     try:
-        curr.execute(f"""
-            CREATE OR REPLACE STAGE {database_name}.{schema_name}.{stage_name}
-            URL = f'{bucket_url}'
-            STORAGE_INTEGRATION = {storage_integration_name};                 
-        """)
-        logger.info("Successfully created external stage")
+        with conn.cursor() as curr:
+            curr.execute(f"""
+                CREATE OR REPLACE STAGE {database_name}.{schema_name}.{stage_name}
+                URL = {bucket_url}
+                STORAGE_INTEGRATION = {storage_integration_name};                 
+            """)
 
     except Exception as e:
         logger.error(f"An error occured while creating and loading the stage: {e}")
+        raise RuntimeError(f"Failed to create database {database_name}: {e}")
+
    
 
-def create_file_format():
-
-    FILE_FORMAT_NAME = "read_reservation_json"
+def create_json_file_format(database_name,schema_name,file_format_name):
 
     file_format_script = f"""
-        CREATE FILE FORMAT IF NOT EXISTS {FILE_FORMAT_NAME}
+        CREATE FILE FORMAT IF NOT EXISTS {database_name}.{schema_name}.{file_format_name}
         TYPE = 'JSON'
 
         COMPRESSION = 'NONE'
@@ -70,12 +69,14 @@ def create_file_format():
 
         STRIP_NULL_VALUES = FALSE
     """
+    with conn.cursor() as curr:
+        try:
+            curr.execute(file_format_script)
+            logger.info("Successfully created Json file format")
+        except Exception as e:
+            logger.info(f"An error occured while creating a fileformat: {e}")
+            raise RuntimeError(f"Failed to create FILE FORMAT {file_format_name}: {e}")
 
-    try:
-        curr.execute(file_format_script)
-        logger.info("Successfully created Json file format")
-    except Exception as e:
-        logger.info(f"An error occured while creating a fileformat: {e}")
     
   
 def create_table_restaurants():
@@ -86,12 +87,13 @@ def create_table_restaurants():
             restaurant_name VARCHAR(50),
             PRIMARY KEY(restaurant_id));
     """
-
-    try:
-        curr.execute(create_table_restaurant_script)
-        logger.info("Successfully created table: Restaurant")
-    except Exception as e:
-        logger.info(f"An error occured while creating table: Restaurant: {e}")
+    with conn.cursor() as curr:
+        try:
+            curr.execute(create_table_restaurant_script)
+            logger.info("Successfully created table: Restaurant")
+        except Exception as e:
+            logger.info(f"An error occured while creating table: Restaurant: {e}")
+            raise RuntimeError(f"An error occured while creating table: Restaurant: {e}") 
 
 def create_table_platforms():
 
@@ -101,12 +103,13 @@ def create_table_platforms():
             platform_name VARCHAR(50),
             PRIMARY KEY(platform_id));
     """
-
-    try:
-        curr.execute(create_table_platform_script)
-        logger.info("Successfully created table: Platform")
-    except Exception as e:
-        logger.info(f"An error occured while creating table: Platform: {e}")
+    with conn.cursor() as curr:
+        try:
+            curr.execute(create_table_platform_script)
+            logger.info("Successfully created table: Platform")
+        except Exception as e:
+            logger.info(f"An error occured while creating table: Platform: {e}")
+            raise RuntimeError(f"An error occured while creating table: Platform: {e}")
 
 def create_table_customers():
 
@@ -117,11 +120,13 @@ def create_table_customers():
             customer_phone VARCHAR(50) NOT NULL,
             customer_email VARCHAR(50) NOT NULL);
     """
-    try:
-        curr.execute(create_customer_table_script)
-        logger.info("Successfully created table: Customers")
-    except Exception as e:
-        logger.info(f"An error occured while creating table: Customers: {e}")
+    with conn.cursor() as curr:
+        try:
+            curr.execute(create_customer_table_script)
+            logger.info("Successfully created table: Customers")
+        except Exception as e:
+            logger.info(f"An error occured while creating table: Customers: {e}")
+            raise RuntimeError(f"An error occured while creating table: Customers: {e}") 
 
 
 def create_table_payments():
@@ -137,11 +142,13 @@ def create_table_payments():
             total_amount DECIMAL(10, 2)
         )
     """
-    try:
-        curr.execute(create_table_payments_script)
-        logger.info("Successfully created table: Payments")
-    except Exception as e:
-        logger.info(f"An error occured while creating table: Payments: {e}")
+    with conn.cursor() as curr:
+        try:
+            curr.execute(create_table_payments_script)
+            logger.info("Successfully created table: Payments")
+        except Exception as e:
+            logger.info(f"An error occured while creating table: Payments: {e}")
+            raise RuntimeError(f"An error occured while creating table: Payments: {e}") 
 
 
 def create_table_reservations():
@@ -158,25 +165,24 @@ def create_table_reservations():
             special_request TEXT, 
             created_at DATETIME, 
             updated_at DATETIME, 
-            experience INT REFERENCES experiences(experience_id),
             payment INT REFERENCES payments(payment_id)
         
         )
        
     """
-
-    try:
-        curr.execute(create_table_reservations_script)
-        logger.info("Successfully created table: Reservations")
-    except Exception as e:
-        logger.info(f"An error occured while creating table: Reservations: {e}")
+    with conn.cursor() as curr:
+        try:
+            curr.execute(create_table_reservations_script)
+            logger.info("Successfully created table: Reservations")
+        except Exception as e:
+            logger.info(f"An error occured while creating table: Reservations: {e}")
+            raise RuntimeError(f"An error occured while creating table: Reservations: {e}")
 
 def insert_into_restaurant_platform_table():
     """
         One time load script
     """
-    try:
-        insert_into_restaurant = f"""
+    insert_into_restaurant = f"""
             INSERT INTO restaurants(restaurant_id, restaurant_name) 
             SELECT DISTINCT $1:restaurant_id::INT, $1:restaurant_name
             FROM @S3_STAGE_TEST/{date_today}
@@ -184,24 +190,31 @@ def insert_into_restaurant_platform_table():
 
         """
 
-        insert_into_platform = f"""
+    insert_into_platform = f"""
 
-            INSERT INTO platforms(platform_name)
-            SELECT DISTINCT $1:platform
-            FROM @s3_stage_test/{date_today}
-            (FILE_FORMAT => 'READ_RESERVATION_JSON')
+        INSERT INTO platforms(platform_name)
+        SELECT DISTINCT $1:platform
+        FROM @s3_stage_test/{date_today}
+        (FILE_FORMAT => 'READ_RESERVATION_JSON')
 
-        """
-
-        curr.execute(insert_into_restaurant)
-        curr.execute(insert_into_platform)
+    """
+    
+    try:
+        
+        with conn.cursor() as curr:
+            curr.execute(insert_into_restaurant)
+            curr.execute(insert_into_platform)
 
     except Exception as e:
         logger.error(f"An error occured while inserting data into restaurant/platform table...: {e}")
 
 
-def run_table_creation_scripts():
+def run_table_creation_scripts(database_name, schema_name):
     try:
+        with conn.cursor() as curr:
+            curr.execute(f"USE DATABASE {database_name}")
+            curr.execute(f"USE SCHEMA {database_name}.{schema_name}")
+
         create_table_platforms()
         create_table_restaurants()
         create_table_payments()
@@ -210,7 +223,7 @@ def run_table_creation_scripts():
 
     except Exception as e:
         logger.error(f"An error occured while creating the tables: {e}")
-        raise RuntimeError("SQL error") from e
+        raise RuntimeError(f"An error occured while creating the tables: {e}") 
 
 
 def run_default_insert_into_restaurant_platform_scripts():
@@ -219,3 +232,21 @@ def run_default_insert_into_restaurant_platform_scripts():
     except Exception as e:
         logger.error(f"An error occured while inserting into the default tables: {e}")
         raise RuntimeError("SQL error") from e
+    
+
+def select_table_creation_script(name, database_name, schema_name):
+    with conn.cursor() as curr:
+            curr.execute(f"USE DATABASE {database_name}")
+            curr.execute(f"USE SCHEMA {database_name}.{schema_name}")
+            if name == "CUSTOMERS":
+                create_table_customers()
+            elif name == "PAYMENTS":
+                create_table_payments()
+            elif name == "RESERVATIONS":
+                create_table_reservations()
+            elif name == "PLATFORMS":
+                create_table_platforms()
+            elif name == "RESTAURANTS":
+                create_table_restaurants()
+            else:
+                raise ValueError("Invalid input value for table")
