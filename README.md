@@ -69,25 +69,23 @@ graph TD;
 
 ```mermaid
 graph LR;
-    A[AWS EventBridge Scheduler] --> B[AWS Lambda Generates <br> Mock Data];
-    B --> C[S3 Staging Bucket];
+    A[AWS EventBridge <br>  Scheduler Invokes <br> AWS lambda] --> B[AWS Lambda Generates <br> Mock Data <br> daily];
+    B --> C[Uploads to <br> S3 Staging Bucket];
     C --> D[FastAPI on EC2 Serves <br> JSON Data via API Endpoint];
-
 ```
 
 ### Data Pipeline Flowchart
 
 ```mermaid
 graph LR;
-    A[Airflow Pipeline Triggred] --> B[Booking Platform API<br>Endpoint Hit] --> C[FastAPI on EC2<br>Handles Request and returns Response];
-```
-```mermaid
+    A[Daily Airflow Pipeline Triggred] --> B[Booking Platform API<br>Endpoint Hit] --> C[FastAPI on EC2<br>Handles Request];
+
 graph TD
-    C[Extract DAG receives response <br> aggregates data <br> and passes to <br> Validation DAG] --> D[Data Cleaning & Validation<br>with Pydantic];
+    C[Extract DAG <br> aggregates data <br> and passes to <br> Validation DAG] --> D[Data <br> Cleaning & Validation<br>with Pydantic];
     D --> E[S3 Processed<br>Data Storage];
     E --> F[Snowflake connects to External s3<br>Table Staging];
     F --> G[Pre-Load Checks<br>in Snowflake];
-    G --> F[Final Load into<br>Snowflake Warehouse];
+    G --> H[Final Load into<br>Snowflake Warehouse Table];
 ```
 
 ## 📦 Project Workflow
