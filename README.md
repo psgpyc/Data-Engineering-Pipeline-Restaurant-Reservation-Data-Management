@@ -89,17 +89,20 @@ graph TD
 
 ```bash
 .
-├── dags/               # Airflow DAGs & configs
-├── logs/               # Pipeline scripts: extract, validate, load, etc.
-├── snowflakecore/      # Snowflake loading scripts
-├── endpoints/          # FastAPI endpoints serving data
-├── validators/         # Pydantic and business rule validation
-├── infrastructure/     # Terraform IaC (S3, Lambda, EC2, Airflow)
-│   └── modules/        # Modular setup for AWS services
-├── pipeline.py         # Orchestration entrypoint
-├── requirements.txt    # Python dependencies
-└── README.md
-```
+├── dags/                             # Main Airflow DAG project folder
+│   ├── config/                       # settings & configuration
+│   ├── loader/                       # Pre-load checks for Snowflake
+│   ├── logs/                         # ETL run logs
+│   ├── pipelines/                    # Extract, process, load scripts
+│   ├── snowflakecore/                # Snowflake loaders SQL Scripts
+│   ├── utils/                        # Helper functions (connections, checks)
+│   ├── validators/                   # Data validation with Pydantic                 
+│   └── pipeline.py                   # DAG orchestration entrypoint
+├── endpoints/                       # FastAPI app for mock booking APIs
+├── infrastructure/                  # Terraform AWS infra setup
+│   └── modules/                     # Modular AWS resources (S3, Lambda, etc.)
+├── requirements.txt                 # Python dependencies
+└── README.md                        # Project overview
 
 
 ## 👨‍💻 Author
