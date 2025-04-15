@@ -52,6 +52,19 @@ It collects daily reservation data for three restaurants from mock APIs simulati
 
 ## Flowchart
 
+### Infrastructure Provisioning Flowchart
+
+```mermaid
+graph TD;
+    A[Terraform] --> B[Provision EC2 Instance];
+    A --> C[Provision AWS Lambda & Scheduler];
+    A --> D[Create S3 Buckets];
+    A --> E[Set IAM Roles & Policies];
+    B --> F[EC2 with FastAPI];
+    C --> G[Lambda for Data Generation];
+    D --> H[S3 Staging & Processed Buckets];
+
+
 ### Data Generation and Serving Flowchart
 
 ```mermaid
@@ -67,27 +80,17 @@ graph LR;
 ```mermaid
 graph LR;
     A[Booking Platform API<br>Endpoint Hit] --> B[FastAPI on EC2<br>Handles Request];
-    B --> C[Apache Airflow<br>Workflow Triggered];
+    B --> C[Apache Airflow <br> DAG aggregates the data <br>Workflow Triggered];
 ```
 ```mermaid
 graph TD
-    C --> D[Data Validation<br>with Pydantic];
+    C[Extract DAG send data <br> to Validation DAG] --> D[Data Validation<br>with Pydantic];
     D --> E[S3 Processed<br>Data Storage];
     E --> F[Snowflake External<br>Table Staging];
     F --> G[Final Load into<br>Snowflake Warehouse];
 ```
 
-### Infrastructure Provisioning Flowchart
 
-```mermaid
-graph TD;
-    A[Terraform] --> B[Provision EC2 Instance];
-    A --> C[Provision AWS Lambda & Scheduler];
-    A --> D[Create S3 Buckets];
-    A --> E[Set IAM Roles & Policies];
-    B --> F[EC2 with FastAPI];
-    C --> G[Lambda for Data Generation];
-    D --> H[S3 Staging & Processed Buckets];
 ```
 
 ## 📦 Project Workflow
