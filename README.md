@@ -11,11 +11,11 @@ As a data engineer, I’ve built a **production-grade architecture** that progra
 
 | Layer | Tools Used |
 |-------|------------|
-| **Infrastructure as Code(IaC)** | Terraform ( to provision S3, EC2, AWS Lambda and IAM setup) |
-| **Cloud Provider** | AWS (Using Boto3) |
-| **Data Processing** | SQL, Pandas |
+| **Infrastructure as Code(IaC)** | Terraform ( to provision S3, EC2, AWS Lambda, Eventbridge and IAM setup) |
+| **Cloud Provider** | AWS |
+| **Programming Language** | SQL, Python |
 | **Data Orchestration** | Apache Airflow |
-| **Data Warehouse** | Snowflake (Python Connector / Snowpark) |
+| **Data Warehouse** | Snowflake |
 | **Visualization** | Tableau |
 | **Monitoring/Alerting** | Logging, Email/Slack Alerts |
 | **Project Automation** | GitHub Actions |
@@ -24,23 +24,21 @@ As a data engineer, I’ve built a **production-grade architecture** that progra
 ## 📦 Project Workflow
 
 1. **Infrastructure Provisioning**  
-   Provision 3 versioned S3 buckets (`raw`, `staging`, `processed`) and IAM roles using **Terraform**.
+   Provision 3 versioned S3 buckets (`raw`, `staging`, `processed`), EC2 instance, Eventbridge(for lambda) and IAM roles using **Terraform**.
 
 2. **Daily Data Extraction**  
    Python scripts query booking data from:
    - OpenTable API
    - TheFork API
-   - Quandoo API
-   - POS API
 
 3. **Raw Data Storage**  
    Store unprocessed booking data in AWS S3 → `raw/` bucket.
 
 4. **Data Cleaning & Transformation**  
-   Process raw JSON/CSV files using Pandas and upload cleaned output to S3 → `processed/` bucket.
+   Process raw JSON/CSV files using Pandas and upload cleaned output to S3 → `staging/` bucket.
 
 5. **Load to Snowflake**  
-   Use **Snowflake Python Connector** or **Snowpark** to load cleaned data from S3 into Snowflake tables.
+   Use **Snowflake Python Connector** or to load cleaned data from S3 into Snowflake tables.
 
 6. **Orchestration**  
    Use **Apache Airflow** to schedule and automate the entire pipeline end-to-end.
