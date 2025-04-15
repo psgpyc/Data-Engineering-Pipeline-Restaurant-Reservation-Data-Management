@@ -63,7 +63,7 @@ graph TD;
     B --> F[EC2 with FastAPI];
     C --> G[Lambda for Data Generation];
     D --> H[S3 Staging & Processed Buckets];
-
+```
 
 ### Data Generation and Serving Flowchart
 
@@ -88,9 +88,6 @@ graph TD
     D --> E[S3 Processed<br>Data Storage];
     E --> F[Snowflake External<br>Table Staging];
     F --> G[Final Load into<br>Snowflake Warehouse];
-```
-
-
 ```
 
 ## 📦 Project Workflow
