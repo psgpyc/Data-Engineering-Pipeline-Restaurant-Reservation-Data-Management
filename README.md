@@ -1,25 +1,88 @@
 
-# Ozzy: Multi-Platform Restaurant Booking Pipeline
+# Data Engineering Pipeline: Restaurant Reservation Data Management
 
-This project showcases an end-to-end **automated data engineering pipeline** for a group of restaurants using 3 different booking platforms.
+This project demonstrates a full-scale data engineering pipeline built using industry-standard tools and practices.  
+It collects daily reservation data for three restaurants from mock APIs simulating OpenTable and The Fork, processes and validates the data, and stores it in AWS S3. The data is then systematically loaded into a Snowflake data warehouse. The pipeline is fully automated using Apache Airflow and AWS services, with infrastructure provisioned using Terraform.
 
-As a data engineer, I’ve built a **production-grade architecture** that programmatically fetches booking data daily, stores and processes it using AWS and Python, and loads it into Snowflake for analytics and dashboarding.
+### Workflow
+1. **Data Generation (AWS Lambda & Scheduler)**
+   - **AWS Lambda** generates mock reservation data daily.
+   - **AWS EventBridge Scheduler** automates the daily execution of Lambda.
+   - Data is stored in an S3 raw bucket.
+
+2. **API Simulation (FastAPI & EC2)**
+   - An **EC2 instance** running FastAPI acts as a web server, simulating real-world API endpoints.
+   - The API retrieves processed reservation data from S3 and serves it in JSON format.
+
+3. **Data Processing & Validation (Python & Pydantic)**
+   - Extracted data is validated using **Pydantic** models.
+   - Unnecessary data is removed, and processed data is stored in a separate S3 staging bucket.
+
+4. **Data Storage & Warehousing (AWS S3 & Snowflake)**
+   - Processed data is loaded into **Snowflake** using the Snowflake Python connector.
+
+
+### Infrastructure Provisioning
+- Infrastructure, including EC2 instances, AWS Lambda functions, S3 buckets, IAM roles, and policies, are provisioned using **Terraform**.
+
+### Pipeline Orchestration
+- **Apache Airflow** orchestrates the entire ETL workflow, ensuring automated execution, monitoring, and error handling.
+- Extended **logging** functionality enhances Airflow's default logs with custom messages for better traceability.
+
+
 
 ---
 
 ## 🔧 Tools & Technologies
 
-| Layer | Tools Used |
-|-------|------------|
-| **Infrastructure as Code(IaC)** | Terraform ( to provision S3, EC2, AWS Lambda, Eventbridge and IAM setup) |
-| **Cloud Provider** | AWS |
-| **Programming Language** | SQL, Python |
-| **Data Orchestration** | Apache Airflow |
-| **Data Warehouse** | Snowflake |
-| **Visualization** | Tableau |
-| **Monitoring/Alerting** | Logging, Email/Slack Alerts |
-| **Project Automation** | GitHub Actions |
+## Technology Stack
+
+- **AWS Lambda & EventBridge Scheduler**: Serverless compute & automation.
+- **AWS EC2 & FastAPI**: Simulated real-world API endpoints.
+- **Terraform**: Infrastructure as Code (IaC) for AWS resource provisioning.
+- **Apache Airflow**: Pipeline orchestration and automation.
+- **Snowflake**: Cloud data warehouse solution.
+- **AWS S3**: Data Lake storage.
+- **Python & SQL**: Core programming language.
+- **Pydantic**: Data validation and modeling.
+- **Boto3**: Python SDK for AWS.
+- **Snowflake Python Connector**: Connecting Python applications to Snowflake.
+
 ---
+
+
+
+
+
+
+
+
+## Flowchart
+
+### Data Pipeline Flowchart
+
+```mermaid
+graph TD;
+    A[AWS EventBridge Scheduler] --> B[AWS Lambda Generates Mock Data];
+    B --> C[S3 Staging Bucket];
+    C --> D[Apache Airflow Workflow];
+    D --> E[Data Validation with Pydantic];
+    E --> F[S3 Processed Bucket];
+    F --> G[Snowflake Data Warehouse];
+```
+
+### Infrastructure Provisioning Flowchart
+
+```mermaid
+graph TD;
+    A[Terraform] --> B[Provision EC2 Instance];
+    A --> C[Provision AWS Lambda & Scheduler];
+    A --> D[Create S3 Buckets];
+    A --> E[Set IAM Roles & Policies];
+    B --> F[EC2 with FastAPI];
+    C --> G[Lambda for Data Generation];
+    D --> H[S3 Staging & Processed Buckets];
+```
 
 ## 📦 Project Workflow
 
