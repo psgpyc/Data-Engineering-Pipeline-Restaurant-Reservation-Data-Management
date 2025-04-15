@@ -50,24 +50,27 @@ It collects daily reservation data for three restaurants from mock APIs simulati
 
 ---
 
-
-
-
-
-
-
-
 ## Flowchart
 
 ### Data Generation and Serving Flowchart
 
 ```mermaid
 graph LR;
-    A[AWS EventBridge Scheduler] --> B[AWS Lambda Generates Mock Data];
+    A[AWS EventBridge Scheduler] --> B[AWS Lambda Generates <br> Mock Data];
     B --> C[S3 Staging Bucket];
-    C --> D[FastAPI on EC2 Serves JSON Data via API Endpoint];
+    C --> D[FastAPI on EC2 Serves <br> JSON Data via API Endpoint];
 
 ```
+
+graph TD;
+    A[Booking Platform API<br>Endpoint Hit] --> B[FastAPI on EC2<br>Handles Request];
+    B --> C[Apache Airflow<br>Workflow Triggered];
+
+    %% Switch to horizontal flow from here
+    C --> D[Data Validation<br>with Pydantic];
+    D --> E[S3 Processed<br>Data Storage];
+    E --> F[Snowflake External<br>Table Staging];
+    F --> G[Final Load into<br>Snowflake Warehouse];
 
 ### Infrastructure Provisioning Flowchart
 
