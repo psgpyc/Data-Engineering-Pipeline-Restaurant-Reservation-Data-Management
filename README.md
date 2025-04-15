@@ -79,15 +79,15 @@ graph LR;
 
 ```mermaid
 graph LR;
-    A[Booking Platform API<br>Endpoint Hit] --> B[FastAPI on EC2<br>Handles Request];
-    B --> C[Apache Airflow <br> DAG aggregates the data <br>Workflow Triggered];
+    A[Airflow Pipeline Triggred] --> B[Booking Platform API<br>Endpoint Hit] --> C[FastAPI on EC2<br>Handles Request and returns Response];
 ```
 ```mermaid
 graph TD
-    C[Extract DAG send data <br> to Validation DAG] --> D[Data Validation<br>with Pydantic];
+    C[Extract DAG receives response <br> aggregates data <br> and passes to <br> Validation DAG] --> D[Data Cleaning & Validation<br>with Pydantic];
     D --> E[S3 Processed<br>Data Storage];
-    E --> F[Snowflake External<br>Table Staging];
-    F --> G[Final Load into<br>Snowflake Warehouse];
+    E --> F[Snowflake connects to External s3<br>Table Staging];
+    F --> G[Pre-Load Checks<br>in Snowflake];
+    G --> F[Final Load into<br>Snowflake Warehouse];
 ```
 
 ## 📦 Project Workflow
