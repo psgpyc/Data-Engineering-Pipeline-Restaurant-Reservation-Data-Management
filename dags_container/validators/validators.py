@@ -1,18 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, EmailStr, constr
 from uuid import UUID
 from datetime import datetime
 from decimal import Decimal
 
-class Experience(BaseModel):
-    """
-        Represents an  experience associated with a reservation, 
-        such as a wine pairing, chef's table, or other premium offering.
-    """
-    name: str
-    description: str
-    prepaid: bool
-    price: Decimal
-    currency: str
 
 class Payments(BaseModel):
     """
@@ -37,13 +27,12 @@ class ReservationValidator(BaseModel):
     platform: str
     status: str
     date_time: datetime
-    party_size: int
+    party_size:int = Field(..., gt=0, lt=50)
     customer_name: str
     customer_phone: str
-    customer_email: str
+    customer_email: EmailStr
     special_requests: str | None
     created_at: datetime
     updated_at: datetime
-    experience: Experience | None
     payment: Payments
 

@@ -1,6 +1,6 @@
-from snowflake_configs.establish_connection import get_connector
+from utils.establish_connection import get_connector
 
-from snowflake_configs.creation import (
+from snowflakecore.sql.creation import (
     create_database, 
     create_schema, 
     create_external_stage, 
@@ -8,7 +8,7 @@ from snowflake_configs.creation import (
     run_table_creation_scripts , 
     select_table_creation_script )
 
-from utils import (
+from utils.existence_checks import (
     database_exists, 
     schema_exists, 
     stage_exists, 

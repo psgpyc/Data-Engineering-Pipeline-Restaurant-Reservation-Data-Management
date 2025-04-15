@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from snowflake_configs.establish_connection import get_connector
+from utils.establish_connection import get_connector
 
 conn = get_connector()
 
@@ -8,10 +8,34 @@ date_today = datetime.now().strftime("%Y-%m-%d")
 
 logger = logging.getLogger("custom_pipeline_logger")
 
-# def select_roles_schema(database_name, database_schema, role):
-#     curr.execute(f"USE ROLE {database_name}")
-#     curr.execute(f"USE DATABASE {database_schema}")
-#     curr.execute(f"USE SCHEMA {role}")
+
+
+def get_storage_integration(storage_name, bucket_name):
+
+
+    create_storage_integration = f"""
+        CREATE STORAGE INTEGRATION IF NOT EXISTS
+            {storage_name}
+        TYPE = EXTERNAL_STAGE
+        STORAGE_PROVIDER = 'S3'
+        STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::897729116490:role/read_restaurant_staging_bucket'
+        ENABLED = TRUE
+        STORAGE_ALLOWED_LOCATIONS = ('{bucket_name}')
+    """
+
+    try:
+        with conn.cursor() as curr:
+            curr.execute("USE ROLE ACCOUNTADMIN;")
+            curr.execute(create_storage_integration)
+            result = curr.fetchall()
+
+            return result, storage_name
+    
+    except Exception as e:
+        print(f"An error occured {e}")
+
+
+
 
 
 def create_schema(database_name, database_schema, role="sysadmin"):

@@ -1,5 +1,5 @@
 import logging
-from snowflake_configs.establish_connection import get_connector
+from utils.establish_connection import get_connector
 # from snowflake_configs.creation_snowflake import use_existing
 from datetime import datetime
 

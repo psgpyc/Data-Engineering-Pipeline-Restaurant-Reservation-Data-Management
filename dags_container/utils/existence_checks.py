@@ -1,4 +1,4 @@
-from snowflake_configs.establish_connection import get_connector
+from utils.establish_connection import get_connector
 
 conn = get_connector()
 

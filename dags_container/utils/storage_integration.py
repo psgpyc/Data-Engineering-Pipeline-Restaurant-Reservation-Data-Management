@@ -3,6 +3,7 @@ from establish_connection import get_connector
 curr = get_connector().cursor()
 
 def get_storage_integration():
+    
     storage_name = "ozzy_pipeline_s3_access"
     create_storage_integration = f"""
         CREATE STORAGE INTEGRATION IF NOT EXISTS
@@ -23,5 +24,3 @@ def get_storage_integration():
     
     except Exception as e:
         print(f"An error occured {e}")
-
-

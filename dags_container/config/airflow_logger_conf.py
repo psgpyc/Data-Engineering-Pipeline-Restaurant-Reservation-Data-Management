@@ -14,6 +14,7 @@ from datetime import datetime
 from airflow.config_templates.airflow_local_settings import DEFAULT_LOGGING_CONFIG
 
 LOGGING_CONFIG = deepcopy(DEFAULT_LOGGING_CONFIG)
+
 TODAY = datetime.now().strftime('%Y:%m:%d')
 
 
