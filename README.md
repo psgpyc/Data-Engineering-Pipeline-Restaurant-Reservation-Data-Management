@@ -87,6 +87,7 @@ graph TD
 
 ### Project Structure 
 
+```bash
 .
 ├── dags/               # Airflow DAGs & configs
 ├── logs/               # Pipeline scripts: extract, validate, load, etc.
@@ -98,7 +99,7 @@ graph TD
 ├── pipeline.py         # Orchestration entrypoint
 ├── requirements.txt    # Python dependencies
 └── README.md
-
+```
 
 
 ## 👨‍💻 Author
