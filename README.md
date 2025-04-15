@@ -79,7 +79,8 @@ graph LR;
 ```mermaid
 graph LR;
     A[Daily Airflow Pipeline Triggred] --> B[Booking Platform API<br>Endpoint Hit] --> C[FastAPI on EC2<br>Handles Request];
-
+```
+```mermaid
 graph TD
     C[Extract DAG <br> aggregates data <br> and passes to <br> Validation DAG] --> D[Data <br> Cleaning & Validation<br>with Pydantic];
     D --> E[S3 Processed<br>Data Storage];
