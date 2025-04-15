@@ -62,15 +62,20 @@ graph LR;
 
 ```
 
-graph TD;
+### Data Pipeline Flowchart
+
+```mermaid
+graph LR;
     A[Booking Platform API<br>Endpoint Hit] --> B[FastAPI on EC2<br>Handles Request];
     B --> C[Apache Airflow<br>Workflow Triggered];
-
-    %% Switch to horizontal flow from here
+```
+```mermaid
+graph TD
     C --> D[Data Validation<br>with Pydantic];
     D --> E[S3 Processed<br>Data Storage];
     E --> F[Snowflake External<br>Table Staging];
     F --> G[Final Load into<br>Snowflake Warehouse];
+```
 
 ### Infrastructure Provisioning Flowchart
 
