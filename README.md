@@ -18,37 +18,8 @@ It collects daily reservation data for three restaurants from mock APIs simulati
 - **Snowflake Python Connector**: Connecting Python applications to Snowflake.
 
 ---
-
-### Workflow
-1. **Data Generation (AWS Lambda & Scheduler)**
-   - **AWS Lambda** generates mock reservation data daily.
-   - **AWS EventBridge Scheduler** automates the daily execution of Lambda.
-   - Data is stored in an S3 raw bucket.
-
-2. **API Simulation (FastAPI & EC2)**
-   - An **EC2 instance** running FastAPI acts as a web server, simulating real-world API endpoints.
-   - The API retrieves processed reservation data from S3 and serves it in JSON format.
-
-3. **Data Processing & Validation (Python & Pydantic)**
-   - Extracted data is validated using **Pydantic** models.
-   - Unnecessary data is removed, and processed data is stored in a separate S3 staging bucket.
-
-4. **Data Storage & Warehousing (AWS S3 & Snowflake)**
-   - Processed data is loaded into **Snowflake** using the Snowflake Python connector.
-
-
 ### Infrastructure Provisioning
 - Infrastructure, including EC2 instances, AWS Lambda functions, S3 buckets, IAM roles, and policies, are provisioned using **Terraform**.
-
-### Pipeline Orchestration
-- **Apache Airflow** orchestrates the entire ETL workflow, ensuring automated execution, monitoring, and error handling.
-- Extended **logging** functionality enhances Airflow's default logs with custom messages for better traceability.
-
-
-
-## Flowchart
-
-### Infrastructure Provisioning Flowchart
 
 ```mermaid
 graph TD;
@@ -61,8 +32,15 @@ graph TD;
     D --> H[S3 Staging & Processed Buckets];
 ```
 
-### Data Generation and Serving Flowchart
+### Data Generation and Serving
 
+1. **Data Generation (AWS Lambda & Scheduler) & API Simulation (FastAPI & EC2)**
+   - **AWS Lambda** generates mock reservation data daily.
+   - **AWS EventBridge Scheduler** automates the daily execution of Lambda.
+   - Data is stored in an S3 raw bucket.
+   - An **EC2 instance** running FastAPI acts as a web server, simulating real-world API endpoints.
+   - The API retrieves processed reservation data from S3 and serves it in JSON format.
+  
 ```mermaid
 graph LR;
     A[AWS EventBridge <br>  Scheduler Invokes <br> AWS lambda] --> B[AWS Lambda Generates <br> Mock Data <br> daily];
@@ -70,12 +48,17 @@ graph LR;
     C --> D[FastAPI on EC2 Serves <br> JSON Data via API Endpoint];
 ```
 
-### Data Pipeline Flowchart
+### Pipeline Orchestration
+- **Apache Airflow** orchestrates the entire ETL workflow, ensuring automated execution, monitoring, and error handling.
+- Extended **logging** functionality enhances Airflow's default logs with custom messages for better traceability.
 
-```mermaid
-graph LR;
-    A[Daily Airflow Pipeline Triggred] --> B[Booking Platform API<br>Endpoint Hit] --> C[FastAPI on EC2<br>Handles Request];
-```
+1. **Data Processing & Validation (Python & Pydantic)**
+   - Extracted data is validated using **Pydantic** models.
+   - Unnecessary data is removed, and processed data is stored in a separate S3 staging bucket.
+
+2. **Data Storage & Warehousing (AWS S3 & Snowflake)**
+   - Processed data is loaded into **Snowflake** using the Snowflake Python connector.
+
 ```mermaid
 graph TD
     C[Extract DAG <br> aggregates data <br> and passes to <br> Validation DAG] --> D[Data <br> Cleaning & Validation<br>with Pydantic];
@@ -103,10 +86,13 @@ graph TD
 │   └── modules/                     # Modular AWS resources (S3, Lambda, etc.)
 ├── requirements.txt                 # Python dependencies
 └── README.md                        # Project overview
+```
 
+---
 
 ## 👨‍💻 Author
 
 [Paritosh Sharma Ghimire](https://www.linkedin.com/in/psgpyc/)
----
+
+
 
